@@ -1,0 +1,58 @@
+service: restaurant-ordering-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    TABLE_NAME: ${self:service}-${opt:stage, 'dev'}-table
+
+plugins:
+  - serverless-offline
+
+functions:
+  getMenu:
+    handler: handlers/menu.get
+    events:
+      - http:
+          path: menu
+          method: get
+  
+  getCart:
+    handler: handlers/cart.get
+    events:
+      - http:
+          path: cart
+          method: get
+
+  addToCart:
+    handler: handlers/cart.add
+    events:
+      - http:
+          path: cart
+          method: post
+
+  createOrder:
+    handler: handlers/order.create
+    events:
+      - http:
+          path: orders
+          method: post
+
+resources:
+  Resources:
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST

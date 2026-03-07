@@ -1,0 +1,5 @@
+{
+  "name": "OrderFlow & Timeline",
+  "description": "A restaurant ordering system with a robust audit trail and order timeline.",
+  "requestFramePermissions": []
+}
