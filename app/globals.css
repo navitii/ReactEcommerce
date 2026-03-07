@@ -1,1 +1,31 @@
 @import "tailwindcss";
+
+.restaurant-header {
+    background-color: #FABF0D;
+}
+
+.promotion-container {
+    background-color: #AF1D1D;
+    width: 100%;
+    height: auto;
+    padding: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+}
+
+.explore-button {
+    border-radius: 15px;
+    background-color: #FABF0D;
+    color: black;
+    font-weight: bold;
+    padding: 15px;
+    cursor: pointer;
+    text-align: center;
+    width: 150px;
+}
+
+.explore-button:hover {
+    background-color: #e0a00d;
+}
