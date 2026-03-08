@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Product, Cart } from '@/types';
+import { Product, Cart, CartItem } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import ProductModal from '@/components/ProductModal';
 import CartSheet from '@/components/CartSheet';
-import { Hamburger, ShoppingBag } from 'lucide-react';
+import { Hamburger, ShoppingBag, Loader2 } from 'lucide-react';
 
 export default function MenuPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<Cart | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [editingCartItem, setEditingCartItem] = useState<CartItem | null>(null);
   const menuRef = useRef<HTMLElement>(null);
 
   const fetchCart = () => {
@@ -24,6 +25,45 @@ export default function MenuPage() {
     }
   };
 
+  const handleEditItem = (item: CartItem) => {
+    setEditingCartItem(item);
+    const product = products.find(p => p.id === item.productId);
+    if (product) {
+      setSelectedProduct(product);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProduct(null);
+    setEditingCartItem(null);
+  };
+
+  const handleModalSubmit = async (product: Product, modifiers: { groupId: string; optionId: string }[], quantity: number) => {
+    if (editingCartItem) {
+      await fetch(`/api/cart/${editingCartItem.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quantity,
+          modifiers
+        })
+      });
+    } else {
+      await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          productId: product.id, 
+          modifiers, 
+          quantity,
+          imageUrl: product.imageUrl
+        }),
+      });
+    }
+    fetchCart();
+    setIsCartOpen(true);
+  };
+
   useEffect(() => {
     fetch('/api/menu').then(res => res.json()).then(setProducts);
     fetchCart();
@@ -33,7 +73,12 @@ export default function MenuPage() {
     await fetch('/api/cart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId: product.id, modifiers, quantity }),
+      body: JSON.stringify({ 
+        productId: product.id, 
+        modifiers, 
+        quantity,
+        imageUrl: product.imageUrl
+      }),
     });
     fetchCart();
     setIsCartOpen(true);
@@ -43,6 +88,14 @@ export default function MenuPage() {
     await fetch(`/api/cart/${itemId}`, { method: 'DELETE' });
     fetchCart();
   };
+
+  const initialModifiers: Record<string, string[]> = {};
+  if (editingCartItem) {
+    editingCartItem.modifiers.forEach(mod => {
+      if (!initialModifiers[mod.groupId]) initialModifiers[mod.groupId] = [];
+      initialModifiers[mod.groupId].push(mod.optionId);
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20" style={{backgroundColor: "#F6EFE3"}}>
@@ -81,41 +134,50 @@ export default function MenuPage() {
       </div>
 
       <main ref={menuRef} className="max-w-5xl mx-auto px-4 py-8 menu-container">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map(product => (
-            <div 
-              key={product.id} 
-              className="product-card"
-              onClick={() => setSelectedProduct(product)}
-            >
-              <div className="h-48 overflow-hidden">
-                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={product.imageUrl} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 product-image"
-                  style={{ borderRadius: "15px 15px 0 0" }}
-                />
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-lg">{product.name}</h3>
-                  <span className="font-medium bg-gray-100 px-2 py-1 rounded text-sm" style={{backgroundColor: "#FABF0D", color: "#AF1D1D"}}>
-                    {formatCurrency(product.basePriceCents)}
-                  </span>
+        {products.length === 0 ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-12 h-12 animate-spin" style={{ color: "#AF1D1D" }} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map(product => (
+              <div 
+                key={product.id} 
+                className="product-card"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <div className="h-48 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 product-image"
+                    style={{ borderRadius: "15px 15px 0 0" }}
+                  />
                 </div>
-                <p className="text-gray-500 text-sm mt-2 line-clamp-2">{product.description}</p>
+                <div className="p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-lg">{product.name}</h3>
+                    <span className="font-medium bg-gray-100 px-2 py-1 rounded text-sm" style={{backgroundColor: "#FABF0D", color: "#AF1D1D"}}>
+                      {formatCurrency(product.basePriceCents)}
+                    </span>
+                  </div>
+                  <p className="text-gray-500 text-sm mt-2 line-clamp-2">{product.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <ProductModal 
         product={selectedProduct} 
         isOpen={!!selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
-        onAddToCart={addToCart}
+        onClose={handleCloseModal} 
+        onSubmit={handleModalSubmit}
+        initialQuantity={editingCartItem ? editingCartItem.quantity : 1}
+        initialModifiers={initialModifiers}
+        isEditing={!!editingCartItem}
       />
 
       <CartSheet 
@@ -123,6 +185,7 @@ export default function MenuPage() {
         isOpen={isCartOpen} 
         onClose={() => setIsCartOpen(false)}
         onRemoveItem={removeFromCart}
+        onEditItem={handleEditItem}
       />
     </div>
   );

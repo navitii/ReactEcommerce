@@ -15,8 +15,8 @@ const EventIcon = ({ type }: { type: string }) => {
 
 export default function Timeline({ events }: { events: TimelineEvent[] }) {
   return (
-    <div className="border rounded-xl bg-white overflow-hidden">
-      <div className="bg-gray-50 px-4 py-3 border-b font-semibold text-gray-700">
+    <div className="border rounded-xl bg-white overflow-hidden" style={{border: '1px solid #AF1D1D'}}>
+      <div className="bg-gray-50 px-4 py-3 border-b font-semibold text-gray-700" style={{backgroundColor: "#AF1D1D", color: "white"}}>
         Order Timeline
       </div>
       <div className="divide-y">

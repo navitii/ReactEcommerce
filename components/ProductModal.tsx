@@ -1,7 +1,7 @@
 'use client';
 
 import { Product, ModifierGroup, ModifierOption } from '@/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { X } from 'lucide-react';
 
@@ -9,12 +9,32 @@ interface ProductModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onAddToCart: (product: Product, modifiers: { groupId: string; optionId: string }[], quantity: number) => void;
+  onSubmit: (product: Product, modifiers: { groupId: string; optionId: string }[], quantity: number) => void;
+  initialQuantity?: number;
+  initialModifiers?: Record<string, string[]>;
+  isEditing?: boolean;
 }
 
-export default function ProductModal({ product, isOpen, onClose, onAddToCart }: ProductModalProps) {
-  const [selectedModifiers, setSelectedModifiers] = useState<Record<string, string[]>>({});
-  const [quantity, setQuantity] = useState(1);
+export default function ProductModal({ 
+  product, 
+  isOpen, 
+  onClose, 
+  onSubmit,
+  initialQuantity = 1,
+  initialModifiers = {},
+  isEditing = false
+}: ProductModalProps) {
+  const [selectedModifiers, setSelectedModifiers] = useState<Record<string, string[]>>(initialModifiers);
+  const [quantity, setQuantity] = useState(initialQuantity);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen && !prevIsOpen) {
+    setQuantity(initialQuantity);
+    setSelectedModifiers(initialModifiers);
+    setPrevIsOpen(true);
+  } else if (!isOpen && prevIsOpen) {
+    setPrevIsOpen(false);
+  }
 
   if (!isOpen || !product) return null;
 
@@ -24,17 +44,15 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
       const isSelected = current.includes(optionId);
 
       if (group.maxSelection === 1) {
-        // Radio behavior
         return { ...prev, [group.id]: [optionId] };
       } else {
-        // Checkbox behavior
         if (isSelected) {
           return { ...prev, [group.id]: current.filter(id => id !== optionId) };
         } else {
           if (current.length < group.maxSelection) {
             return { ...prev, [group.id]: [...current, optionId] };
           }
-          return prev; // Max reached
+          return prev;
         }
       }
     });
@@ -66,14 +84,12 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
         flattenedModifiers.push({ groupId, optionId });
       });
     });
-    onAddToCart(product, flattenedModifiers, quantity);
+    onSubmit(product, flattenedModifiers, quantity);
     onClose();
-    setSelectedModifiers({});
-    setQuantity(1);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"  onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto flex flex-col" style={{backgroundColor: "#F6EFE3"}} onClick={(e) => e.stopPropagation()}>
         <div className="relative h-48 bg-gray-200 shrink-0">
              {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -126,19 +142,27 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
 
         <div className="p-6 bg-gray-50 shrink-0" style={{backgroundColor: "#F6EFE3"}}>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center rounded-lg bg-white" style={{border: "1px solid #AF1D1D", backgroundColor: "#F6EFE3"}}>
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-1" style={{cursor: "pointer"}}>-</button>
-              <span className="px-3 font-medium">{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)} className="px-3 py-1" style={{cursor: "pointer"}}>+</button>
+            <div className="flex items-center rounded-lg bg-white" style={{border: "1px solid #AF1D1D"}}>
+              <button 
+                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuantity(Math.max(1, quantity - 1)); }} 
+                 className="px-3 py-1 cursor-pointer hover:bg-gray-100 text-black rounded-l-lg"
+                 type="button"
+              >-</button>
+              <span className="px-3 font-medium text-black">{quantity}</span>
+              <button 
+                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuantity(quantity + 1); }} 
+                 className="px-3 py-1 cursor-pointer hover:bg-gray-100 text-black rounded-r-lg"
+                 type="button"
+              >+</button>
             </div>
             <div style={{backgroundColor: "#FABF0D", color: "#AF1D1D", width: "100px", textAlign: "center", padding: "3px"}} className="text-xl font-bold rounded">{formatCurrency(calculateTotal())}</div>
           </div>
           <button
             onClick={handleSubmit}
             disabled={!isValid()}
-            className="w-full text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors add-to-cart-button"
+            className="w-full text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors add-to-cart-button cursor-pointer"
           >
-            Add to Cart
+            {isEditing ? 'Update Cart' : 'Add to Cart'}
           </button>
         </div>
       </div>

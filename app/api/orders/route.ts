@@ -35,12 +35,10 @@ export async function POST(req: NextRequest) {
 
   await createOrder(newOrder);
 
-  // Clear Cart
   cart.items = [];
   cart.pricing = { subtotalCents: 0, taxCents: 0, serviceFeeCents: 0, totalCents: 0 };
   await saveCart(cart);
 
-  // Log Events
   await addEvent({
     userId: USER_ID,
     orderId: orderId,
@@ -50,10 +48,9 @@ export async function POST(req: NextRequest) {
     payload: { orderId, totalCents: newOrder.pricing.totalCents }
   });
 
-  // Simulate async processing
   setTimeout(async () => {
     newOrder.status = 'PREPARING';
-    await createOrder(newOrder); // Update
+    await createOrder(newOrder);
     await addEvent({
       userId: USER_ID,
       orderId: orderId,

@@ -5,7 +5,7 @@ import { Order, TimelineEvent } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import Timeline from '@/components/Timeline';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrderStatusPage() {
@@ -33,18 +33,20 @@ export default function OrderStatusPage() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Poll every 5s
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  if (!order && loading) return <div className="p-10 text-center">Loading...</div>;
+  if (!order && loading) return <div className="flex justify-center items-center py-20">
+    <Loader2 className="w-12 h-12 animate-spin" style={{ color: "#AF1D1D" }} />
+  </div>;
   if (!order) return <div className="p-10 text-center text-red-500">Order not found</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8" style={{backgroundColor: "#F6EFE3"}}>
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center text-gray-600 hover:text-black">
+          <Link href="/" className="flex items-center hover:text-black" style={{color: '#AF1D1D'}}>
             <ArrowLeft size={20} className="mr-2" /> Back to Menu
           </Link>
           <button onClick={fetchData} className="p-2 bg-white rounded-full shadow hover:bg-gray-50">
@@ -52,15 +54,15 @@ export default function OrderStatusPage() {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b pb-6">
+        <div className="bg-white rounded-xl shadow-sm border p-6" style={{border: '1px solid #AF1D1D'}}>
+          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b pb-6"  style={{ borderBottomColor: '#AF1D1D' }}>
             <div>
               <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
               <p className="text-gray-500 text-sm mt-1">Placed on {new Date(order.createdAt).toLocaleString()}</p>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 uppercase tracking-wider font-semibold">Status</span>
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold border ${
+              <span style={{backgroundColor: "#FABF0D", color: "#AF1D1D", fontWeight: "bold"}} className={`px-4 py-1.5 rounded-full text-sm ${
                 order.status === 'COMPLETED' ? 'bg-green-100 text-green-700 border-green-200' :
                 order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 border-red-200' :
                 'bg-blue-100 text-blue-700 border-blue-200'
@@ -75,14 +77,17 @@ export default function OrderStatusPage() {
               <h3 className="font-semibold mb-4">Items</h3>
               <div className="space-y-3">
                 {order.items.map(item => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <div>
-                      <span className="font-medium">{item.quantity}x {item.productName}</span>
-                      {item.modifiers.length > 0 && (
-                        <div className="text-gray-500 text-xs pl-4">
-                          {item.modifiers.map(m => m.name).join(', ')}
-                        </div>
-                      )}
+                  <div key={item.id} className="flex justify-between text-sm" style={{alignItems: "center"}}>
+                    <div style={{display: "flex", alignItems: 'center', gap: '20px'}}>
+                      <img src={item.productImage} alt={item.productName} className="w-16 h-16 object-cover rounded" />
+                      <div>
+                        <span className="font-medium">{item.quantity}x {item.productName}</span>
+                        {item.modifiers.length > 0 && (
+                          <div className="text-gray-500 text-xs pl-4">
+                            {item.modifiers.map(m => m.name).join(', ')}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <span>{formatCurrency(item.totalPriceCents)}</span>
                   </div>
@@ -105,8 +110,8 @@ export default function OrderStatusPage() {
                   <span>{formatCurrency(order.pricing.serviceFeeCents)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg pt-2 border-t mt-2">
-                  <span>Total</span>
-                  <span>{formatCurrency(order.pricing.totalCents)}</span>
+                  <span style={{color: "#AF1D1D"}}>Total</span>
+                  <span style={{color: "#AF1D1D"}}>{formatCurrency(order.pricing.totalCents)}</span>
                 </div>
               </div>
             </div>

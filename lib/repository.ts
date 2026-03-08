@@ -1,11 +1,10 @@
 import { Product, Cart, Order, TimelineEvent, EventType, CartItem } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
-// --- In-Memory Storage ---
 class InMemoryDB {
   products: Product[] = [];
-  carts: Map<string, Cart> = new Map(); // userId -> Cart
-  orders: Map<string, Order> = new Map(); // orderId -> Order
+  carts: Map<string, Cart> = new Map();
+  orders: Map<string, Order> = new Map();
   events: TimelineEvent[] = [];
 
   constructor() {
@@ -62,17 +61,15 @@ class InMemoryDB {
       { id: 'prod_4', name: 'Spicy Tacos', description: 'Three soft tacos with salsa.', basePriceCents: 1300, imageUrl: 'https://familiakitchen.com/wp-content/uploads/2021/01/iStock-960337396-3beef-barbacoa-tacos-e1695391119564.jpg', modifierGroups: createModifiers(true) },
       { id: 'prod_5', name: 'Fries', description: 'Golden crispy fries.', basePriceCents: 400, imageUrl: 'https://www.allrecipes.com/thmb/8_B6OD1w6h1V0zPi8KAGzD41Kzs=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/50223-homemade-crispy-seasoned-french-fries-VAT-Beauty-4x3-789ecb2eaed34d6e879b9a93dd56a50a.jpg', modifierGroups: [] },
       { id: 'prod_6', name: 'Soda', description: 'Refreshing carbonated beverage.', basePriceCents: 250, imageUrl: 'https://www.shutterstock.com/image-photo/full-size-cocacola-plastic-bottle-600nw-2642734713.jpg', modifierGroups: [] },
+      { id: 'prod_7', name: 'Ice Cream', description: 'Vanilla soft serve.', basePriceCents: 500, imageUrl: 'https://static01.nyt.com/images/2025/08/12/multimedia/12FD-ICE-CREAMREX1-SL-Easy-Homemade-Ice-Cream-bzhv/12FD-ICE-CREAMREX1-SL-Easy-Homemade-Ice-Cream-bzhv-mediumSquareAt3X.jpg', modifierGroups: [] },
     ];
   }
 }
 
-// Singleton instance
 const globalForDb = globalThis as unknown as { db: InMemoryDB };
 const db = globalForDb.db || new InMemoryDB();
 
 if (process.env.NODE_ENV !== 'production') globalForDb.db = db;
-
-// --- Repository Functions ---
 
 export const getProducts = async () => db.products;
 export const getProductById = async (id: string) => db.products.find(p => p.id === id);
@@ -123,12 +120,10 @@ export const getEventsByOrderId = async (orderId: string) => {
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 };
 
-// --- Business Logic Helpers ---
-
 export const calculateCartPricing = (items: CartItem[]) => {
   const subtotalCents = items.reduce((sum, item) => sum + item.totalPriceCents, 0);
-  const taxCents = Math.round(subtotalCents * 0.10); // 10% tax
-  const serviceFeeCents = items.length > 0 ? 200 : 0; // Flat $2.00 fee if cart not empty
+  const taxCents = Math.round(subtotalCents * 0.10);
+  const serviceFeeCents = items.length > 0 ? 200 : 0;
   const totalCents = subtotalCents + taxCents + serviceFeeCents;
   
   return { subtotalCents, taxCents, serviceFeeCents, totalCents };

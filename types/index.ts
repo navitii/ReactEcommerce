@@ -24,8 +24,8 @@ export type Product = {
 export type CartItemModifier = {
   groupId: string;
   optionId: string;
-  name: string; // Snapshot name
-  priceCents: number; // Snapshot price
+  name: string;
+  priceCents: number;
 };
 
 export type CartItem = {
@@ -33,15 +33,16 @@ export type CartItem = {
   productId: string;
   productName: string;
   quantity: number;
-  unitPriceCents: number; // Base + modifiers
+  unitPriceCents: number;
   totalPriceCents: number;
   modifiers: CartItemModifier[];
+  productImage: string;
 };
 
 export type CartPricing = {
   subtotalCents: number;
-  taxCents: number; // e.g. 10%
-  serviceFeeCents: number; // e.g. 200
+  taxCents: number;
+  serviceFeeCents: number;
   totalCents: number;
 };
 
@@ -75,7 +76,7 @@ export type EventType =
 export type TimelineEvent = {
   eventId: string;
   timestamp: string;
-  orderId?: string; // Optional because cart events might not have an orderId yet (though usually we track cartId or session)
+  orderId?: string;
   userId: string;
   type: EventType;
   source: 'web' | 'api' | 'worker';

@@ -3,7 +3,7 @@ import { getCart, saveCart, getProductById, calculateCartPricing, addEvent } fro
 import { CartItem, CartItemModifier } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
-const USER_ID = 'user-123'; // Mock User ID
+const USER_ID = 'user-123';
 
 export async function GET() {
   const cart = await getCart(USER_ID);
@@ -23,14 +23,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });
   }
 
-  // Calculate Item Price Server-Side
   let unitPriceCents = product.basePriceCents;
   const validModifiers: CartItemModifier[] = [];
 
-  // Validate and price modifiers
   if (modifiers && Array.isArray(modifiers)) {
     for (const mod of modifiers) {
-      // Find the group and option in the product definition
       const group = product.modifierGroups.find(g => g.id === mod.groupId);
       if (group) {
         const option = group.options.find(o => o.id === mod.optionId);
@@ -54,7 +51,8 @@ export async function POST(req: NextRequest) {
     quantity,
     unitPriceCents,
     totalPriceCents: unitPriceCents * quantity,
-    modifiers: validModifiers
+    modifiers: validModifiers,
+    productImage: product.imageUrl
   };
 
   const cart = await getCart(USER_ID);
