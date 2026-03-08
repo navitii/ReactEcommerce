@@ -28,28 +28,19 @@ export default function Timeline({ events }: { events: TimelineEvent[] }) {
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
-                  <span className="font-medium text-sm text-gray-900">{event.type}</span>
+                  <span className="font-medium text-sm text-gray-900">{event.type === "ORDER_PLACED" ? "Order Placed" : "Order in Preparation"}</span>
                   <span className="text-xs text-gray-400 font-mono">
                     {format(new Date(event.timestamp), 'MMM d, HH:mm:ss.SSS')}
                   </span>
                 </div>
-                <div className="text-xs text-gray-500 mt-1 flex gap-2">
-                  <span className="bg-gray-100 px-1.5 py-0.5 rounded border">Source: {event.source}</span>
-                  {event.correlationId && (
-                    <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 truncate max-w-[150px]" title={event.correlationId}>
-                      Corr: {event.correlationId}
-                    </span>
-                  )}
-                </div>
+                
                 <div className="mt-2">
                   <details className="group/details">
                     <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none list-none flex items-center gap-1">
-                      <span>Payload</span>
+                      <span>Information</span>
                       <span className="group-open/details:rotate-180 transition-transform">▼</span>
                     </summary>
-                    <pre className="mt-2 bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto font-mono">
-                      {JSON.stringify(event.payload, null, 2)}
-                    </pre>
+                    <span className="font-medium text-sm text-gray-900">{event.type === "ORDER_PLACED" ? "Order Accepted and is being prepared" : "Order is being prepared soon is going to be ready"}</span>
                   </details>
                 </div>
               </div>

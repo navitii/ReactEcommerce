@@ -130,7 +130,7 @@ export default function MenuPage() {
           <span style={{color: "#FAFFFA", marginTop: "10px"}}>The best burgers here at navi burger Lorem ipsum dolor sit amet<br/> consectetur adipisicing elit.</span>
           <div className='explore-button' onClick={handleExploreClick}>Explore Now</div>
         </div>
-        <img src="https://png.pngtree.com/png-vector/20240829/ourmid/pngtree-delicious-and-testy-cheese-burger-png-image_13659847.png" alt="Promotion"  />
+        <img className="responsive-promo-image" src="https://png.pngtree.com/png-vector/20240829/ourmid/pngtree-delicious-and-testy-cheese-burger-png-image_13659847.png" alt="Promotion"  />
       </div>
 
       <main ref={menuRef} className="max-w-5xl mx-auto px-4 py-8 menu-container">
