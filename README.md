@@ -63,3 +63,11 @@ npm run lint
 - `POST /api/orders` - Place order (Idempotent)
 - `GET /api/orders/:id` - Get order details
 - `GET /api/orders/:id/timeline` - Get audit trail
+
+Preview: 
+<img width="1252" height="908" alt="image" src="https://github.com/user-attachments/assets/40c8ca3b-9ed1-4401-9e87-94ea0c40f41d" />
+<img width="448" height="917" alt="image" src="https://github.com/user-attachments/assets/65247694-26b5-4a6b-88ab-f07d302b4035" />
+<img width="1041" height="632" alt="image" src="https://github.com/user-attachments/assets/b4c23bd3-26f3-4c1b-a3eb-de0c59626ef7" />
+
+
+
